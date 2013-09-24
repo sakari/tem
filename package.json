@@ -1,0 +1,19 @@
+{
+  "name": "tem",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "author": "sakariij@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt-typescript": "~0.2.4",
+    "grunt-cli": "~0.1.9",
+    "grunt": "~0.4.1",
+    "typescript": "~0.9.1-1",
+    "browserify": "~2.32.4",
+    "grunt-simple-mocha": "~0.4.0"
+  }
+}
