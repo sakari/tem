@@ -2,26 +2,12 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         typescript: {
-            build: {
-                src: ['src/**/*.ts'],
-                dest: 'build/src',
-                options: {
-                    module: 'commonj',
-                    target: 'es5',
-                    base_path: 'src',
-                    sourcemap: false,
-                    fullSourceMapPath: false,
-                    declaration: true,
-                    noImplicitAny: true
-                }
-            },
             test: {
                 src: ['test/**/*.ts'],
-                dest: 'build/test',
+                dest: 'build',
                 options: {
                     module: 'commonj',
                     target: 'es5',
-                    base_path: 'test',
                     sourcemap: false,
                     fullSourceMapPath: false,
                     declaration: true,
