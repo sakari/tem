@@ -38,10 +38,13 @@ module.exports = function(grunt) {
                 ui: 'bdd'
             },
             all: { src: ['build/test/**/*.js'] }
-        }
+        },
+        
+        clean: ['build']
     });
     grunt.loadNpmTasks('grunt-typescript');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.registerTask('build', ['typescript']);
+    grunt.registerTask('build', ['clean', 'typescript']);
     grunt.registerTask('test', ['build', 'simplemocha']);
 }
