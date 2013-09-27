@@ -9,45 +9,59 @@ export class Plate {
 }
 
 export class Tag {
-    constructor( private _tag: String
-                 , private _attr: Array<{attr: String; value: String}>) {
-    }
-
-    public id(id: String) {
-        return new Tag(this._tag, this._attr.concat([{attr: 'id', value: id}]))
+    constructor( public _tag: String
+                 , public _attr: Array<{attr: String; value: String}>) {
     }
 
     get plate(): String {
         var attrs = this._attr.map((a) => {
             return a.attr + '="' + a.value + '"'
-        }).join('')
+        }).join(' ')
 
         return '<' + this._tag + ' ' + attrs + '/>'
     }
-}
-
-export class TagContainer {
-    constructor(private _tag: String
-                , private _children: Array<Plate>
-                , private _attr: Array<{attr: String; value: String}>) {
-    }
 
     public id(id: String) {
-        return new TagContainer(this._tag
-                                , this._children
-                                , this._attr.concat([{attr: 'id', value: id }]))
+        this._attr.push({attr: 'id', value: id })
+        return this
+    }
+
+    public class(c: String) {
+        return this._mergeAttr('class', c) 
+    }
+    
+    _mergeAttr(attr: String, value: String) {
+        var found = false
+        this._attr.map((a) => {
+            if(a.attr !== attr)
+                return
+            found = true
+            a.value = a.value + ' ' + value
+            return
+        })
+        if(!found)
+            this._attr.push({attr: attr, value: value})
+        return this
+    }
+}
+
+export class TagContainer extends Tag {
+    constructor(_tag: String
+                , private _children: Array<Plate>
+                , _attr: Array<{attr: String; value: String}>) {
+        super(_tag, _attr)
     }
 
     public child(child: Plate) {
-        return new TagContainer(this._tag
-                                , this._children.concat([child])
-                                , this._attr)
+        this._children.push(child)
+        return this
     }
+
 
     get plate(): String {
         var attrs = this._attr.map((a) => {
             return a.attr + '="' + a.value + '"'
-        }).join('')
+        }).join(' ')
 
         var children = this._children.map((c) => {
             return c.plate
@@ -81,11 +95,23 @@ export class Variable {
     }
 }
 
+export class Input<T> extends Tag {
+    constructor(type: String) {
+        super('input', [{attr: 'type', value: type}])
+    }
+
+    value(t: T) {
+        this._attr.push({attr: 'value', value: '' + t})
+        return this
+    }
+}
+
 export var variable = () => { return new Variable() }
 export var plate = ''
-export var div = new TagContainer('div', [], [])
-export var span = new TagContainer('span', [], [])
-export var p = new TagContainer('p', [], [])
+export var div = () => { return new TagContainer('div', [], []) }
+export var span = () => { return new TagContainer('span', [], []) }
+export var p = () => { return new TagContainer('p', [], [])}
 export var input = {
-    text: new Tag('input', [{attr: 'type', value: 'text'}])
+    text: () => { return new Input<String>('text') }
+    , number: () => { return new Input<number>('number') }
 }

@@ -12,27 +12,48 @@ describe('tem', () => {
         })
 
         it('allows setting id of element', () => {
-            tem.div.id('id').plate.should.eql('<div id="id"></div>')
+            tem.div().id('id').plate.should.eql('<div id="id"></div>')
         })
 
         it('allows setting child elements', () => {
-            tem.div.child(tem.div).plate
+            tem.div().child(tem.div()).plate
                 .should.eql('<div ><div ></div></div>')
         })
 
+        it('allows setting classes', () => {
+            tem.div().class('c1').class('c2').plate
+                .should.equal('<div class="c1 c2"></div>')
+        })
+
         it('provides these html elements', () => {
-            tem.div.plate.should.equal('<div ></div>')
-            tem.p.plate.should.equal('<p ></p>')
-            tem.span.plate.should.eql('<span ></span>')
-            tem.input.text.plate.should.eql('<input type="text"/>')
+            tem.div().plate.should.equal('<div ></div>')
+            tem.p().plate.should.equal('<p ></p>')
+            tem.span().plate.should.eql('<span ></span>')
+            tem.input.text().plate.should.eql('<input type="text"/>')
+        })
+
+        describe('input elements', () => {
+            it('allows setting string value to text input', () => {
+                tem.input.text()
+                    .value("abc")
+                    .plate
+                    .should.equal('<input type="text" value="abc"/>')
+            })
+
+            it('allows setting number value to number input', () => {
+                tem.input.number()
+                    .value(1)
+                    .plate
+                    .should.equal('<input type="number" value="1"/>')
+            })
         })
     })
 
     describe('variables', () => {
         it('variables are substituted', () => {
             var v = tem.variable()
-            var t = tem.div.child(v)
-            v.set(tem.div)
+            var t = tem.div().child(v)
+            v.set(tem.div())
             t.plate.should.eql('<div ><div ></div></div>')
         })
 
