@@ -64,6 +64,20 @@ describe('tem', () => {
                     .plate
                     .should.equal('<select ><option ></option></select>')
             })
+        
+            describe('option', () => {
+                it('stringifies json object to value', () => {
+                    var opt = tem.option().value({ foo: 1})
+                    tem.select()
+                        .child(opt)
+                        .plate
+                        .should.equal('<select ><option value="{\"foo\":1}"></option></select>')
+                })
+                it('leaves strings as is', () => {
+                    tem.select().child(tem.option().value('abc')).plate
+                        .should.equal('<select ><option value="abc"></option></select>')
+                })
+            })
         })
     })
 

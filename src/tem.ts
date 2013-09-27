@@ -28,6 +28,10 @@ export class Tag implements TagLike {
         return this._mergeAttr('class', c) 
     }
     
+    _addAttr(attr: String, value: String) {
+        this._attr.push({attr: attr, value: value})
+    }
+
     _mergeAttr(attr: String, value: String) {
         var found = false
         this._attr.map((a) => {
@@ -38,7 +42,7 @@ export class Tag implements TagLike {
             return
         })
         if(!found)
-            this._attr.push({attr: attr, value: value})
+            this._addAttr(attr, value)
         return this
     }
 }
@@ -101,13 +105,13 @@ export class TagVar implements TagLike{
     }
 }
 
-export class OptVar implements OptionLike {
+export class OptVar<T> implements OptionLike<T> {
     _isOption: boolean
     _isTag: boolean
 
-    constructor(private _t?: Option) {}
+    constructor(private _t?: Option<T>) {}
 
-    set(t: Option) {
+    set(t: Option<T>) {
         this._t = t
         return this
     }
@@ -116,7 +120,7 @@ export class OptVar implements OptionLike {
         return this._t.plate
     }
 
-    join(v: OptVar) {
+    join(v: OptVar<T>) {
         return new JointPlate(this, v)
     }
 }
@@ -132,15 +136,15 @@ export class Input<T> extends Tag {
     }
 }
 
-export class Select extends Tag implements TagLike {
-    _children: Array<OptionLike>
+export class Select<T> extends Tag implements TagLike {
+    _children: Array<OptionLike<T>>
 
     constructor() {
         super('select', [])
         this._children = []
     }
 
-    child(opt: OptionLike) {
+    child(opt: OptionLike<T>) {
         this._children.push(opt)
         return this
     }
@@ -150,15 +154,23 @@ export class Select extends Tag implements TagLike {
     }
 }
 
-export interface OptionLike extends TagLike {
+export interface OptionLike<T> extends TagLike {
     _isOption: boolean
 }
 
-export class Option extends TagContainer implements OptionLike{
+export class Option<T> extends TagContainer implements OptionLike<T>{
     _isOption: boolean
 
     constructor() {
         super('option', [], [])
+    }
+
+    value(t: T) {
+        if(typeof t === 'string')
+            this._addAttr('value', '' + t)
+        else
+            this._addAttr('value', JSON.stringify(t))
+        return this
     }
 }
 
