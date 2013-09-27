@@ -32,6 +32,16 @@ describe('tem', () => {
             tem.input.text().plate.should.eql('<input type="text"/>')
         })
 
+        describe('followedBy', () => {
+            it('joins tags together', () => {
+                tem.div()
+                    .followedBy(tem.span())
+                    .followedBy(tem.div())
+                    .plate
+                    .should.equal('<div ></div><span ></span><div ></div>')
+            })
+        })
+
         describe('input elements', () => {
             it('allows setting string value to text input', () => {
                 tem.input.text()
@@ -64,7 +74,7 @@ describe('tem', () => {
                     .plate
                     .should.equal('<select ><option ></option></select>')
             })
-        
+
             describe('option', () => {
                 it('stringifies json object to value', () => {
                     var opt = tem.option().value({ foo: 1})
@@ -73,9 +83,22 @@ describe('tem', () => {
                         .plate
                         .should.equal('<select ><option value="{\"foo\":1}"></option></select>')
                 })
+
                 it('leaves strings as is', () => {
                     tem.select().child(tem.option().value('abc')).plate
                         .should.equal('<select ><option value="abc"></option></select>')
+                })
+
+                it('can be followed by other options', () => {
+                    tem.option().followedBy(tem.option()).plate
+                        .should.eql('<option ></option><option ></option>')
+                })
+
+                it('can be followed by option vars', () => {
+                    var o = tem.variable.opt()
+                    o.set(tem.option())
+                    tem.option().followedBy(o).plate
+                        .should.eql('<option ></option><option ></option>')
                 })
             })
         })
@@ -87,22 +110,6 @@ describe('tem', () => {
             var t = tem.div().child(v)
             v.set(tem.div())
             t.plate.should.eql('<div ><div ></div></div>')
-        })
-
-        describe('array values', () => {
-            it('more than one value can be set', () => {
-                var v = tem.variable.tag()
-                v.add(tem.div()).add(tem.div())
-                    .plate
-                    .should.equal('<div ></div><div ></div>')
-            })
-
-            it('can clear the set values', () => {
-                var v = tem.variable.tag()
-                v.add(tem.div()).clear
-                    .plate
-                    .should.equal('')
-            })
         })
     })
 })

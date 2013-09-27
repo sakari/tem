@@ -6,9 +6,11 @@ export interface Plate {
 
 export class Tag implements TagLike {
     _isTag: boolean
+    _next: Array<TagLike>
 
     constructor( public _tag: String
                  , public _attr: Array<{attr: String; value: String}>) {
+        this._next = []
     }
 
     get plate(): String {
@@ -16,7 +18,7 @@ export class Tag implements TagLike {
             return a.attr + '="' + a.value + '"'
         }).join(' ')
 
-        return '<' + this._tag + ' ' + attrs + '/>'
+        return '<' + this._tag + ' ' + attrs + '/>' + this._nextTags()
     }
 
     public id(id: String) {
@@ -27,7 +29,18 @@ export class Tag implements TagLike {
     public class(c: String) {
         return this._mergeAttr('class', c) 
     }
-    
+
+    public followedBy(next: TagLike) {
+        this._next.push(next)
+        return this
+    }
+
+    _nextTags() {
+        return this._next.map((n) => {
+            return n.plate
+        }).join('')
+    }
+
     _addAttr(attr: String, value: String) {
         this._attr.push({attr: attr, value: value})
     }
@@ -68,7 +81,9 @@ export class TagContainer extends Tag {
         var children = this._children.map((c) => {
             return c.plate
         }).join('')
-        return '<' + this._tag + ' ' + attrs + '>' + children +'</' + this._tag +'>'
+        return '<' + this._tag + ' ' + attrs + '>' + children +'</' + 
+            this._tag +'>' + 
+            this._nextTags()
     }
 }
 
@@ -76,89 +91,37 @@ export interface TagLike extends Plate{
     _isTag: boolean;
 }
 
-export class Var {
-    _value: Array<Plate>;
-    constructor(v: Plate) {
-        this._value = []
-        if(v) this._value.push(v)
-    }
-
-    set(t: Plate) {
-        this._value = [t]
-        return this
-    }
-    
-    add(t: Plate) {
-        this._value.push(t)
-        return this
-    }
-
-    get clear() {
-        this._value = []
-        return this
-    }
-
-    get plate(): String {
-        return this._value.map((v) => { return v.plate }).join('')
-    }
-
-}
 
 export class TagVar implements TagLike{
     _isTag: boolean;
-    _value: Array<Tag>;
-    _var: Var;
-        
-    constructor(t?: Tag) {
-        this._var = new Var(t)
+
+    constructor(private _t?: Tag) {
     }
 
     set(t: Tag) {
-        this._var.set(t)
-        return this
-    }
-
-    add(t: Tag) {
-        this._var.add(t)
-        return this
-    }
-
-    get clear() {
-        this._var.clear
+        this._t = t
         return this
     }
 
     get plate(): String {
-        return this._var.plate
+        return this._t.plate
     }
 }
 
 export class OptVar<T> implements OptionLike<T> {
     _isOption: boolean
     _isTag: boolean
-    _var: Var;
 
-    constructor(t?: Option<T>) {
-        this._var = new Var(t)
-    }
-
-    get clear() {
-        this._var.clear
-        return this
+    constructor(private _t?: Option<T>) {
     }
 
     set(t: Option<T>) {
-        this._var.set(t)
-        return this
-    }
-
-    add(t: Option<T>) {
-        this._var.add(t)
+        this._t = t
         return this
     }
 
     get plate(): String {
-        return this._var.plate
+        return this._t.plate
     }
 
 }
@@ -201,6 +164,11 @@ export class Option<T> extends TagContainer implements OptionLike<T>{
 
     constructor() {
         super('option', [], [])
+    }
+
+    followedBy(o: OptionLike<T>) {
+        super.followedBy(o)
+        return this
     }
 
     value(t: T) {
