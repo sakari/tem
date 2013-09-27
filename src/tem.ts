@@ -72,57 +72,95 @@ export class TagContainer extends Tag {
     }
 }
 
-export class JointPlate implements TagLike{
-    _isTag: boolean
-
-    constructor(private _l: TagLike, private _r: TagLike) {}
-
-    get plate(): String {
-        return this._l.plate + '' + this._r.plate
-    }
-}
-
 export interface TagLike extends Plate{
     _isTag: boolean;
 }
 
-export class TagVar implements TagLike{
-    _isTag: boolean
+export class Var {
+    _value: Array<Plate>;
+    constructor(v: Plate) {
+        this._value = []
+        if(v) this._value.push(v)
+    }
 
-    constructor(private _t?: Tag) {}
-
-    set(t: Tag) {
-        this._t = t
+    set(t: Plate) {
+        this._value = [t]
+        return this
+    }
+    
+    add(t: Plate) {
+        this._value.push(t)
         return this
     }
 
-    get plate() {
-        return this._t.plate
+    get clear() {
+        this._value = []
+        return this
     }
 
-    join(v: TagVar) {
-        return new JointPlate(this, v)
+    get plate(): String {
+        return this._value.map((v) => { return v.plate }).join('')
+    }
+
+}
+
+export class TagVar implements TagLike{
+    _isTag: boolean;
+    _value: Array<Tag>;
+    _var: Var;
+        
+    constructor(t?: Tag) {
+        this._var = new Var(t)
+    }
+
+    set(t: Tag) {
+        this._var.set(t)
+        return this
+    }
+
+    add(t: Tag) {
+        this._var.add(t)
+        return this
+    }
+
+    get clear() {
+        this._var.clear
+        return this
+    }
+
+    get plate(): String {
+        return this._var.plate
     }
 }
 
 export class OptVar<T> implements OptionLike<T> {
     _isOption: boolean
     _isTag: boolean
+    _var: Var;
 
-    constructor(private _t?: Option<T>) {}
+    constructor(t?: Option<T>) {
+        this._var = new Var(t)
+    }
 
-    set(t: Option<T>) {
-        this._t = t
+    get clear() {
+        this._var.clear
         return this
     }
 
-    get plate() {
-        return this._t.plate
+    set(t: Option<T>) {
+        this._var.set(t)
+        return this
     }
 
-    join(v: OptVar<T>) {
-        return new JointPlate(this, v)
+    add(t: Option<T>) {
+        this._var.add(t)
+        return this
     }
+
+    get plate(): String {
+        return this._var.plate
+    }
+
 }
 
 export class Input<T> extends Tag {

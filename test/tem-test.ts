@@ -89,18 +89,19 @@ describe('tem', () => {
             t.plate.should.eql('<div ><div ></div></div>')
         })
 
-        describe('join', () => {
-            it('joins two variables', () => {
+        describe('array values', () => {
+            it('more than one value can be set', () => {
                 var v = tem.variable.tag()
-                var k = tem.variable.tag()
-                var joint = v.join(k)
-                v.set(tem.div())
-                k.set(tem.span())
-                joint.plate.should.equal('<div ></div><span ></span>')
+                v.add(tem.div()).add(tem.div())
+                    .plate
+                    .should.equal('<div ></div><div ></div>')
+            })
 
-                v.set(tem.span())
-                k.set(tem.div())
-                joint.plate.should.equal('<span ></span><div ></div>')
+            it('can clear the set values', () => {
+                var v = tem.variable.tag()
+                v.add(tem.div()).clear
+                    .plate
+                    .should.equal('')
             })
         })
     })
