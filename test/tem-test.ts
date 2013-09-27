@@ -55,12 +55,21 @@ describe('tem', () => {
                     .plate
                     .should.eql('<select ><option ></option></select>')
             })
+
+            it('allows option variable as child', () => {
+                var v = tem.variable.opt()
+                v.set(tem.option())
+                tem.select()
+                    .child(v)
+                    .plate
+                    .should.equal('<select ><option ></option></select>')
+            })
         })
     })
 
     describe('variables', () => {
         it('variables are substituted', () => {
-            var v = tem.variable()
+            var v = tem.variable.tag()
             var t = tem.div().child(v)
             v.set(tem.div())
             t.plate.should.eql('<div ><div ></div></div>')
@@ -68,8 +77,8 @@ describe('tem', () => {
 
         describe('join', () => {
             it('joins two variables', () => {
-                var v = tem.variable()
-                var k = tem.variable()
+                var v = tem.variable.tag()
+                var k = tem.variable.tag()
                 var joint = v.join(k)
                 v.set(tem.div())
                 k.set(tem.span())

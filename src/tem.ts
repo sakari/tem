@@ -1,14 +1,10 @@
 ///<reference path="common.d.ts" />
 
-export class Plate {
-    constructor(private _str?: String) {}
-
-    get plate(): String {
-        return this._str ? this._str : ''
-    }
+export interface Plate {
+    plate: String
 }
 
-export class Tag implements Element {
+export class Tag implements TagLike {
     _isTag: boolean
 
     constructor( public _tag: String
@@ -49,12 +45,12 @@ export class Tag implements Element {
 
 export class TagContainer extends Tag {
     constructor(_tag: String
-                , private _children: Array<Element>
+                , private _children: Array<TagLike>
                 , _attr: Array<{attr: String; value: String}>) {
         super(_tag, _attr)
     }
 
-    public child(child: Element) {
+    public child(child: TagLike) {
         this._children.push(child)
         return this
     }
@@ -72,23 +68,22 @@ export class TagContainer extends Tag {
     }
 }
 
-export class JointPlate implements Element{
+export class JointPlate implements TagLike{
     _isTag: boolean
 
-    constructor(private _l: Element, private _r: Element) {}
+    constructor(private _l: TagLike, private _r: TagLike) {}
 
     get plate(): String {
         return this._l.plate + '' + this._r.plate
     }
 }
 
-export interface Element {
+export interface TagLike extends Plate{
     _isTag: boolean;
-    plate: String;
 }
 
-export class Variable implements Element {
-    _isTag: boolean;
+export class TagVar implements TagLike{
+    _isTag: boolean
 
     constructor(private _t?: Tag) {}
 
@@ -101,7 +96,27 @@ export class Variable implements Element {
         return this._t.plate
     }
 
-    join(v: Variable) {
+    join(v: TagVar) {
+        return new JointPlate(this, v)
+    }
+}
+
+export class OptVar implements OptionLike {
+    _isOption: boolean
+    _isTag: boolean
+
+    constructor(private _t?: Option) {}
+
+    set(t: Option) {
+        this._t = t
+        return this
+    }
+
+    get plate() {
+        return this._t.plate
+    }
+
+    join(v: OptVar) {
         return new JointPlate(this, v)
     }
 }
@@ -117,15 +132,15 @@ export class Input<T> extends Tag {
     }
 }
 
-export class Select extends Tag implements Element {
-    _children: Array<Option>
+export class Select extends Tag implements TagLike {
+    _children: Array<OptionLike>
 
     constructor() {
         super('select', [])
         this._children = []
     }
 
-    child(opt: Option) {
+    child(opt: OptionLike) {
         this._children.push(opt)
         return this
     }
@@ -135,7 +150,11 @@ export class Select extends Tag implements Element {
     }
 }
 
-export class Option extends TagContainer {
+export interface OptionLike extends TagLike {
+    _isOption: boolean
+}
+
+export class Option extends TagContainer implements OptionLike{
     _isOption: boolean
 
     constructor() {
@@ -143,7 +162,11 @@ export class Option extends TagContainer {
     }
 }
 
-export var variable = () => { return new Variable() }
+export var variable = {
+    tag: () => { return new TagVar() }
+    , opt: () => { return new OptVar() }
+}
+
 export var plate = ''
 
 export var select = () => { return new Select() }
