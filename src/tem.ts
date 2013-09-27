@@ -8,7 +8,9 @@ export class Plate {
     }
 }
 
-export class Tag {
+export class Tag implements Element {
+    _isTag: boolean
+
     constructor( public _tag: String
                  , public _attr: Array<{attr: String; value: String}>) {
     }
@@ -47,12 +49,12 @@ export class Tag {
 
 export class TagContainer extends Tag {
     constructor(_tag: String
-                , private _children: Array<Plate>
+                , private _children: Array<Element>
                 , _attr: Array<{attr: String; value: String}>) {
         super(_tag, _attr)
     }
 
-    public child(child: Plate) {
+    public child(child: Element) {
         this._children.push(child)
         return this
     }
@@ -70,18 +72,27 @@ export class TagContainer extends Tag {
     }
 }
 
-export class JointPlate {
-    constructor(private _l: Plate, private _r: Plate) {}
+export class JointPlate implements Element{
+    _isTag: boolean
+
+    constructor(private _l: Element, private _r: Element) {}
 
     get plate(): String {
         return this._l.plate + '' + this._r.plate
     }
 }
 
-export class Variable {
-    constructor(private _t?: Plate) {}
+export interface Element {
+    _isTag: boolean;
+    plate: String;
+}
 
-    set(t: Plate) {
+export class Variable implements Element {
+    _isTag: boolean;
+
+    constructor(private _t?: Tag) {}
+
+    set(t: Tag) {
         this._t = t
         return this
     }
