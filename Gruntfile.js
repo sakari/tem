@@ -2,7 +2,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         typescript: {
-            test: {
+            all: {
                 src: ['test/**/*.ts'],
                 dest: 'build',
                 options: {
