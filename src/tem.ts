@@ -117,8 +117,37 @@ export class Input<T> extends Tag {
     }
 }
 
+export class Select extends Tag implements Element {
+    _children: Array<Option>
+
+    constructor() {
+        super('select', [])
+        this._children = []
+    }
+
+    child(opt: Option) {
+        this._children.push(opt)
+        return this
+    }
+
+    get plate(): String {
+        return new TagContainer('select', this._children, this._attr).plate
+    }
+}
+
+export class Option extends TagContainer {
+    _isOption: boolean
+
+    constructor() {
+        super('option', [], [])
+    }
+}
+
 export var variable = () => { return new Variable() }
 export var plate = ''
+
+export var select = () => { return new Select() }
+export var option = () => { return new Option() }
 export var div = () => { return new TagContainer('div', [], []) }
 export var span = () => { return new TagContainer('span', [], []) }
 export var p = () => { return new TagContainer('p', [], [])}

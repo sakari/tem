@@ -47,6 +47,15 @@ describe('tem', () => {
                     .should.equal('<input type="number" value="1"/>')
             })
         })
+
+        describe('select', () => {
+            it('allows only options as children', () => {
+                tem.select()
+                    .child(tem.option())
+                    .plate
+                    .should.eql('<select ><option ></option></select>')
+            })
+        })
     })
 
     describe('variables', () => {
