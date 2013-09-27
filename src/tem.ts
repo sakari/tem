@@ -1,8 +1,10 @@
 ///<reference path="common.d.ts" />
 
 export class Plate {
+    constructor(private _str?: String) {}
+
     get plate(): String {
-        return ''
+        return this._str ? this._str : ''
     }
 }
 
@@ -16,7 +18,7 @@ export class Tag extends Plate {
         return new Tag(this._tag, id)
     }
 
-    get plate() {
+    get plate(): String {
         var id = ''
         if(this._id !== undefined) {
             id = ' id="' + this._id + '"'
@@ -32,26 +34,18 @@ export class TagContainer extends Tag {
         super(_tag, _id)
     }
 
-    public childVar(child: Variable<Tag>) {
-        return this._child(child)
-    }
-
     public id(id: String) {
         return new TagContainer(this._tag, this._children, id)
     }
 
-    public child(child: Tag) {
-        return this._child(child)
-    }
-
-    private _child(child: any) {
+    public child(child: Plate) {
         var children = this._children
         if(children === undefined)
             children = []
         return new TagContainer(this._tag, children.concat([child]), this._id)
     }
 
-    get plate() {
+    get plate(): String {
         var id = ''
         var children =''
         if(this._id !== undefined) {
@@ -66,19 +60,28 @@ export class TagContainer extends Tag {
     }
 }
 
-declare class TagContainer {
-    public child(child: Variable<Tag>): TagContainer
+export class JointPlate extends Plate {
+    constructor(private _l: Plate, private _r: Plate) { super() }
+
+    get plate(): String {
+        return this._l.plate + '' + this._r.plate
+    }
 }
 
+export class Variable extends Plate {
+    constructor(private _t?: Plate) { super() }
 
-export class Variable<T extends Plate> {
-    constructor(private _t?: T) {
-    }
-    set(t: T) {
+    set(t: Plate) {
         this._t = t
+        return this
     }
+
     get plate() {
         return this._t.plate
+    }
+
+    join(v: Variable) {
+        return new JointPlate(this, v)
     }
 }
 

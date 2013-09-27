@@ -28,9 +28,24 @@ describe('tem', () => {
     describe('variables', () => {
         it('variables are substituted', () => {
             var v = tem.variable()
-            var t = tem.div.childVar(v)
+            var t = tem.div.child(v)
             v.set(tem.div)
             t.plate.should.eql('<div><div></div></div>')
+        })
+
+        describe('join', () => {
+            it('joins two variables', () => {
+                var v = tem.variable()
+                var k = tem.variable()
+                var joint = v.join(k)
+                v.set(new tem.Plate('a'))
+                k.set(new tem.Plate('b'))
+                joint.plate.should.equal('ab')
+
+                v.set(new tem.Plate('1'))
+                k.set(new tem.Plate('2'))
+                joint.plate.should.equal('12')
+            })
         })
     })
 })
