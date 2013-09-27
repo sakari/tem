@@ -11,17 +11,20 @@ describe('tem', () => {
             tem.plate.should.equal('')
         })
 
-        it('produces strings', () => {
-            tem.div.plate.should.equal('<div></div>')
-        })
-
         it('allows setting id of element', () => {
             tem.div.id('id').plate.should.eql('<div id="id"></div>')
         })
 
         it('allows setting child elements', () => {
             tem.div.child(tem.div).plate
-                .should.eql('<div><div></div></div>')
+                .should.eql('<div ><div ></div></div>')
+        })
+
+        it('provides these html elements', () => {
+            tem.div.plate.should.equal('<div ></div>')
+            tem.p.plate.should.equal('<p ></p>')
+            tem.span.plate.should.eql('<span ></span>')
+            tem.input.text.plate.should.eql('<input type="text"/>')
         })
     })
 
@@ -30,7 +33,7 @@ describe('tem', () => {
             var v = tem.variable()
             var t = tem.div.child(v)
             v.set(tem.div)
-            t.plate.should.eql('<div><div></div></div>')
+            t.plate.should.eql('<div ><div ></div></div>')
         })
 
         describe('join', () => {

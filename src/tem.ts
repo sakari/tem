@@ -8,68 +8,64 @@ export class Plate {
     }
 }
 
-export class Tag extends Plate {
-    constructor( public _tag: String
-                 , public _id?: String) {
-        super()
+export class Tag {
+    constructor( private _tag: String
+                 , private _attr: Array<{attr: String; value: String}>) {
     }
 
     public id(id: String) {
-        return new Tag(this._tag, id)
+        return new Tag(this._tag, this._attr.concat([{attr: 'id', value: id}]))
     }
 
     get plate(): String {
-        var id = ''
-        if(this._id !== undefined) {
-            id = ' id="' + this._id + '"'
-        }
-        return '<' + this._tag + id + '/>'
+        var attrs = this._attr.map((a) => {
+            return a.attr + '="' + a.value + '"'
+        }).join('')
+
+        return '<' + this._tag + ' ' + attrs + '/>'
     }
 }
 
-export class TagContainer extends Tag {
-    constructor(_tag: String
-                , private _children?: Array<Plate>
-                , _id?: String) {
-        super(_tag, _id)
+export class TagContainer {
+    constructor(private _tag: String
+                , private _children: Array<Plate>
+                , private _attr: Array<{attr: String; value: String}>) {
     }
 
     public id(id: String) {
-        return new TagContainer(this._tag, this._children, id)
+        return new TagContainer(this._tag
+                                , this._children
+                                , this._attr.concat([{attr: 'id', value: id }]))
     }
 
     public child(child: Plate) {
-        var children = this._children
-        if(children === undefined)
-            children = []
-        return new TagContainer(this._tag, children.concat([child]), this._id)
+        return new TagContainer(this._tag
+                                , this._children.concat([child])
+                                , this._attr)
     }
 
     get plate(): String {
-        var id = ''
-        var children =''
-        if(this._id !== undefined) {
-            id = ' id="' + this._id + '"'
-        }
-        if(this._children !== undefined) {
-            children = this._children.map((c) => {
-                return c.plate
-            }).join('')
-        }
-        return '<' + this._tag + id + '>' + children +'</' + this._tag +'>'
+        var attrs = this._attr.map((a) => {
+            return a.attr + '="' + a.value + '"'
+        }).join('')
+
+        var children = this._children.map((c) => {
+            return c.plate
+        }).join('')
+        return '<' + this._tag + ' ' + attrs + '>' + children +'</' + this._tag +'>'
     }
 }
 
-export class JointPlate extends Plate {
-    constructor(private _l: Plate, private _r: Plate) { super() }
+export class JointPlate {
+    constructor(private _l: Plate, private _r: Plate) {}
 
     get plate(): String {
         return this._l.plate + '' + this._r.plate
     }
 }
 
-export class Variable extends Plate {
-    constructor(private _t?: Plate) { super() }
+export class Variable {
+    constructor(private _t?: Plate) {}
 
     set(t: Plate) {
         this._t = t
@@ -87,4 +83,9 @@ export class Variable extends Plate {
 
 export var variable = () => { return new Variable() }
 export var plate = ''
-export var div = new TagContainer('div')
+export var div = new TagContainer('div', [], [])
+export var span = new TagContainer('span', [], [])
+export var p = new TagContainer('p', [], [])
+export var input = {
+    text: new Tag('input', [{attr: 'type', value: 'text'}])
+}
