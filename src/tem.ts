@@ -1,7 +1,8 @@
 ///<reference path="common.d.ts" />
 
+var $ = require('../../lib/jquery')
 export interface Plate {
-    plate: String
+    plate: JQuery
 }
 
 export class Tag implements TagLike {
@@ -13,12 +14,12 @@ export class Tag implements TagLike {
         this._next = []
     }
 
-    get plate(): String {
-        var attrs = this._attr.map((a) => {
-            return a.attr + '="' + a.value + '"'
-        }).join(' ')
-
-        return '<' + this._tag + ' ' + attrs + '/>' + this._nextTags()
+    get plate(): JQuery {
+        var e = $('<' + this._tag + '/>') 
+        this._attr.map((a) => {
+            e.attr(a.attr, a.value)
+        })
+        return this._nextTags(e)
     }
 
     public id(id: String) {
@@ -35,10 +36,13 @@ export class Tag implements TagLike {
         return this
     }
 
-    _nextTags() {
-        return this._next.map((n) => {
+    _nextTags(e: JQuery) {
+        var workaround = $('<div>')
+        workaround.append(e)
+        workaround.append(this._next.map((n) => {
             return n.plate
-        }).join('')
+        }))
+        return workaround.children()
     }
 
     _addAttr(attr: String, value: String) {
@@ -73,17 +77,16 @@ export class TagContainer extends Tag {
     }
 
 
-    get plate(): String {
-        var attrs = this._attr.map((a) => {
-            return a.attr + '="' + a.value + '"'
-        }).join(' ')
-
+    get plate(): JQuery {
         var children = this._children.map((c) => {
             return c.plate
-        }).join('')
-        return '<' + this._tag + ' ' + attrs + '>' + children +'</' + 
-            this._tag +'>' + 
-            this._nextTags()
+        })
+        var tag = $('<' + this._tag + '>')
+        this._attr.map((a) => {
+            tag.attr(a.attr, a.value)
+        })
+        tag.append(children)
+        return this._nextTags(tag)
     }
 }
 
@@ -103,7 +106,7 @@ export class TagVar implements TagLike{
         return this
     }
 
-    get plate(): String {
+    get plate(): JQuery {
         return this._t.plate
     }
 }
@@ -120,7 +123,7 @@ export class OptVar<T> implements OptionLike<T> {
         return this
     }
 
-    get plate(): String {
+    get plate(): JQuery {
         return this._t.plate
     }
 
@@ -150,7 +153,7 @@ export class Select<T> extends Tag implements TagLike {
         return this
     }
 
-    get plate(): String {
+    get plate(): JQuery {
         return new TagContainer('select', this._children, this._attr).plate
     }
 }
@@ -185,7 +188,7 @@ export var variable = {
     , opt: () => { return new OptVar() }
 }
 
-export var plate = ''
+export var plate = $()
 
 export var select = () => { return new Select() }
 export var option = () => { return new Option() }
