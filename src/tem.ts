@@ -204,6 +204,17 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
     }
 }
 
+export interface LiLike extends TagLike {
+    _isLi: boolean
+}
+export class Li<C extends TagLike, S extends LiLike> 
+    extends TagContainer<C, S> implements LiLike {
+    _isLi: boolean
+    constructor() {
+        super('li', [])
+    }
+}
+
 export var variable = {
     tag: () => { return new TagVar() }
     , opt: () => { return new OptVar() }
@@ -217,6 +228,18 @@ export function select<V>(): Select<V, OptionLike<V>, TagLike>{
 
 export function option<V>(): Option<V, TagLike, OptionLike<V>> {
     return new Option()
+}
+
+export function ol(): TagContainer<LiLike, TagLike> {
+    return new TagContainer('ol', [])
+}
+
+export function ul(): TagContainer<LiLike, TagLike> {
+    return new TagContainer('ul', [])
+}
+
+export function li(): Li<TagLike, LiLike> {
+    return new Li()
 }
 
 export function div(): TagContainer<TagLike, TagLike> {

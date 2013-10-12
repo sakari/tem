@@ -86,6 +86,22 @@ describe('tem', () => {
             })
         })
 
+        describe('ol', () => {
+            it('allows li elements as children', () => {
+                tem.ol().child(tem.li()).plate
+                    .find('li').length
+                    .should.equal(1)
+            })
+        })
+
+        describe('ul', () => {
+            it('allows li elements as children', () => {
+                tem.ul().child(tem.li()).plate
+                    .find('li').length
+                    .should.equal(1)
+            })
+        })
+
         describe('select', () => {
             it('allows only options as children', () => {
                 tem.select()
@@ -93,7 +109,7 @@ describe('tem', () => {
                     .plate
                     .find('option')
                     .length
-                    .should.eql(1)
+                    .should.equal(1)
             })
 
             it('allows option variable as child', () => {
