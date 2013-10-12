@@ -5,11 +5,41 @@ export interface Plate {
     plate: JQuery
 }
 
-export class SingleTag implements TagLike {
+export class NextTags<T extends Plate> {
+    _next: Array<T>
+
+    constructor() {
+        this._next = []
+    }
+
+    public followedBy(next: T) {
+        this._next.push(next)
+        return this
+    }
+
+    public plate(e: JQuery): JQuery {
+        var workaround = $('<div>')
+        workaround.append(e)
+        workaround.append(this._next.map((n) => {
+            return n.plate
+        }))
+        return workaround.children()
+    }
+}
+
+export class Tag<S extends TagLike> implements TagLike {
     _isTag: boolean
+
+    public _next: NextTags<S>
 
     constructor(public _tag: String
                  , public _attr: Array<{attr: String; value: String}>) {
+        this._next = new NextTags()
+    }
+
+    public followedBy(next: S) {
+        this._next.followedBy(next)
+        return this
     }
 
     public get plate(): JQuery {
@@ -21,7 +51,7 @@ export class SingleTag implements TagLike {
         this._attr.map((a) => {
             e.attr(a.attr, a.value)
         })
-        return e
+        return this._next.plate(e)
     }
 
     public id(id: String) {
@@ -52,36 +82,14 @@ export class SingleTag implements TagLike {
     }
 }
 
-export class NextTags {
-    _next: Array<TagLike>
-
-    constructor() {
-        this._next = []
-    }
-
-    public followedBy(next: TagLike) {
-        this._next.push(next)
-        return this
-    }
-    
-    public plate(e: JQuery): JQuery {
-        var workaround = $('<div>')
-        workaround.append(e)
-        workaround.append(this._next.map((n) => {
-            return n.plate
-        }))
-        return workaround.children()
-    }
-}
-
-export class HasChildren {
-    _children: Array<TagLike>
+export class HasChildren<T extends Plate> {
+    _children: Array<T>
 
     constructor() {
         this._children = []
     }
 
-    add(child: TagLike) {
+    add(child: T) {
         this._children.push(child)
     }
 
@@ -94,34 +102,15 @@ export class HasChildren {
     }
 }
 
-export class Tag extends SingleTag {
-    public _next: NextTags
-
-    constructor( tag: String
-                 , attr: Array<{attr: String; value: String}>) {
-        super(tag, attr)
-        this._next = new NextTags
-    }
-
-    get plate(): JQuery {
-        return this._next.plate(super.getPlate())
-    }
-
-    public followedBy(next: TagLike) {
-        this._next.followedBy(next)
-        return this
-    }
-}
-
-export class SingleTagContainer extends SingleTag {
-    _contained: HasChildren
+export class TagContainer<C extends TagLike, S extends TagLike> extends Tag<S> {
+    _contained: HasChildren<C>
 
     constructor(tag: String, attr: Array<{attr: String; value: String}>) {
         super(tag, attr)
         this._contained = new HasChildren()
     }
 
-    public child(child: TagLike) {
+    public child(child: C) {
         this._contained.add(child)
         return this
     }
@@ -131,26 +120,9 @@ export class SingleTagContainer extends SingleTag {
     }
 
     public getPlate(): JQuery {
-        return this._contained.plate(super.getPlate())
-    }
-}
-
-export class TagContainer extends Tag {
-    _contained: HasChildren
-
-    constructor(_tag: String
-                , _attr: Array<{attr: String; value: String}>) {
-        super(_tag, _attr)
-        this._contained = new HasChildren()
-    }
-
-    public child(child: TagLike) {
-        this._contained.add(child)
-        return this
-    }
-
-    get plate(): JQuery {
-        return this._next.plate(this._contained.plate(super.getPlate()))
+        var e = super.getPlate()
+        this._contained.plate(e.first())
+        return e
     }
 }
 
@@ -159,13 +131,13 @@ export interface TagLike extends Plate{
 }
 
 
-export class TagVar implements TagLike{
+export class TagVar<S extends TagLike> implements TagLike{
     _isTag: boolean;
 
-    constructor(private _t?: Tag) {
+    constructor(private _t?: Tag<S>) {
     }
 
-    set(t: Tag) {
+    set(t: Tag<S>) {
         this._t = t
         return this
     }
@@ -175,51 +147,39 @@ export class TagVar implements TagLike{
     }
 }
 
-export class OptVar<T> implements OptionLike<T> {
-    _isOption: boolean
-    _isTag: boolean
+export class OptVar<V, C extends TagLike, S extends OptionLike<V>> 
+    implements OptionLike<V> {
+        _isOption: boolean
+        _isTag: boolean
 
-    constructor(private _t?: Option<T>) {
+        constructor(private _t?: Option<V, C, S>) {
+        }
+
+        set(t: Option<V, C, S>) {
+            this._t = t
+            return this
+        }
+
+        get plate(): JQuery {
+            return this._t.plate
+        }
     }
 
-    set(t: Option<T>) {
-        this._t = t
-        return this
-    }
-
-    get plate(): JQuery {
-        return this._t.plate
-    }
-
-}
-
-export class Input<T> extends Tag {
+export class Input<V, S extends TagLike> extends Tag<S> {
     constructor(type: String) {
         super('input', [{attr: 'type', value: type}])
     }
 
-    value(t: T) {
+    value(t: V) {
         this._attr.push({attr: 'value', value: '' + t})
         return this
     }
 }
 
-export class Select<T> extends Tag implements TagLike {
-    _contained: HasChildren
-
+export class Select<V, C extends OptionLike<V>, S extends TagLike> 
+    extends TagContainer<C, S> implements TagLike {
     constructor() {
         super('select', [])
-        this._contained = new HasChildren()
-    }
-
-    option(opt: OptionLike<T>) {
-        this._contained.add(opt)
-        return this
-    }
-
-    get plate(): JQuery {
-        var e = super.getPlate()
-        return this._contained.plate(super.getPlate())
     }
 }
 
@@ -227,31 +187,20 @@ export interface OptionLike<T> extends TagLike {
     _isOption: boolean
 }
 
-export class Option<T> extends SingleTagContainer implements OptionLike<T>{
+export class Option<V, C extends TagLike, S extends OptionLike<V> > 
+    extends TagContainer<C, S> implements OptionLike<V>{
     _isOption: boolean
-    _next: NextTags
 
     constructor() {
         super('option', [])
-        this._next = new NextTags()
     }
 
-    followedBy(o: OptionLike<T>) {
-        this._next.followedBy(o)
-        return this
-    }
-
-    value(t: T) {
+    value(t: V) {
         if(typeof t === 'string')
             this._addAttr('value', '' + t)
         else
             this._addAttr('value', JSON.stringify(t))
         return this
-    }
-
-    get plate(): JQuery {
-        var e = super.getPlate()
-        return this._next.plate(e)
     }
 }
 
@@ -262,11 +211,26 @@ export var variable = {
 
 export var plate = $()
 
-export var select = () => { return new Select() }
-export var option = () => { return new Option() }
-export var div = () => { return new TagContainer('div', []) }
-export var span = () => { return new TagContainer('span', []) }
-export var p = () => { return new TagContainer('p', [])}
+export function select<V>(): Select<V, OptionLike<V>, TagLike>{
+    return new Select()
+}
+
+export function option<V>(): Option<V, TagLike, OptionLike<V>> {
+    return new Option()
+}
+
+export function div(): TagContainer<TagLike, TagLike> {
+    return new TagContainer('div', [])
+}
+
+export function span(): TagContainer<TagLike, TagLike> {
+    return new TagContainer('span', [])
+}
+
+export function p(): TagContainer<TagLike, TagLike> {
+    return new TagContainer('p', [])
+}
+
 export var input = {
     text: () => { return new Input<String>('text') }
     , number: () => { return new Input<number>('number') }
