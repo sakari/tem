@@ -5,21 +5,23 @@ export interface Plate {
     plate: JQuery
 }
 
-export class Tag implements TagLike {
+export class SingleTag implements TagLike {
     _isTag: boolean
-    _next: Array<TagLike>
 
-    constructor( public _tag: String
+    constructor(public _tag: String
                  , public _attr: Array<{attr: String; value: String}>) {
-        this._next = []
     }
 
-    get plate(): JQuery {
+    public get plate(): JQuery {
+        return this.getPlate()
+    }
+
+    public getPlate(): JQuery {
         var e = $('<' + this._tag + '/>') 
         this._attr.map((a) => {
             e.attr(a.attr, a.value)
         })
-        return this._nextTags(e)
+        return e
     }
 
     public id(id: String) {
@@ -29,20 +31,6 @@ export class Tag implements TagLike {
 
     public class(c: String) {
         return this._mergeAttr('class', c) 
-    }
-
-    public followedBy(next: TagLike) {
-        this._next.push(next)
-        return this
-    }
-
-    _nextTags(e: JQuery) {
-        var workaround = $('<div>')
-        workaround.append(e)
-        workaround.append(this._next.map((n) => {
-            return n.plate
-        }))
-        return workaround.children()
     }
 
     _addAttr(attr: String, value: String) {
@@ -64,29 +52,105 @@ export class Tag implements TagLike {
     }
 }
 
-export class TagContainer extends Tag {
-    constructor(_tag: String
-                , private _children: Array<TagLike>
-                , _attr: Array<{attr: String; value: String}>) {
-        super(_tag, _attr)
+export class NextTags {
+    _next: Array<TagLike>
+
+    constructor() {
+        this._next = []
+    }
+
+    public followedBy(next: TagLike) {
+        this._next.push(next)
+        return this
+    }
+    
+    public plate(e: JQuery): JQuery {
+        var workaround = $('<div>')
+        workaround.append(e)
+        workaround.append(this._next.map((n) => {
+            return n.plate
+        }))
+        return workaround.children()
+    }
+}
+
+export class HasChildren {
+    _children: Array<TagLike>
+
+    constructor() {
+        this._children = []
+    }
+
+    add(child: TagLike) {
+        this._children.push(child)
+    }
+
+    plate(e: JQuery) {
+        var children = this._children.map((c: TagLike) => {
+            return c.plate
+        })
+        e.append(children)
+        return e
+    }
+}
+
+export class Tag extends SingleTag {
+    public _next: NextTags
+
+    constructor( tag: String
+                 , attr: Array<{attr: String; value: String}>) {
+        super(tag, attr)
+        this._next = new NextTags
+    }
+
+    get plate(): JQuery {
+        return this._next.plate(super.getPlate())
+    }
+
+    public followedBy(next: TagLike) {
+        this._next.followedBy(next)
+        return this
+    }
+}
+
+export class SingleTagContainer extends SingleTag {
+    _contained: HasChildren
+
+    constructor(tag: String, attr: Array<{attr: String; value: String}>) {
+        super(tag, attr)
+        this._contained = new HasChildren()
     }
 
     public child(child: TagLike) {
-        this._children.push(child)
+        this._contained.add(child)
         return this
     }
 
+    get plate(): JQuery {
+        return this.getPlate()
+    }
+
+    public getPlate(): JQuery {
+        return this._contained.plate(super.getPlate())
+    }
+}
+
+export class TagContainer extends Tag {
+    _contained: HasChildren
+
+    constructor(_tag: String
+                , _attr: Array<{attr: String; value: String}>) {
+        super(_tag, _attr)
+        this._contained = new HasChildren()
+    }
+
+    public child(child: TagLike) {
+        this._contained.add(child)
+        return this
+    }
 
     get plate(): JQuery {
-        var children = this._children.map((c) => {
-            return c.plate
-        })
-        var tag = $('<' + this._tag + '>')
-        this._attr.map((a) => {
-            tag.attr(a.attr, a.value)
-        })
-        tag.append(children)
-        return this._nextTags(tag)
+        return this._next.plate(this._contained.plate(super.getPlate()))
     }
 }
 
@@ -141,20 +205,21 @@ export class Input<T> extends Tag {
 }
 
 export class Select<T> extends Tag implements TagLike {
-    _children: Array<OptionLike<T>>
+    _contained: HasChildren
 
     constructor() {
         super('select', [])
-        this._children = []
+        this._contained = new HasChildren()
     }
 
-    child(opt: OptionLike<T>) {
-        this._children.push(opt)
+    option(opt: OptionLike<T>) {
+        this._contained.add(opt)
         return this
     }
 
     get plate(): JQuery {
-        return new TagContainer('select', this._children, this._attr).plate
+        var e = super.getPlate()
+        return this._contained.plate(super.getPlate())
     }
 }
 
@@ -162,15 +227,17 @@ export interface OptionLike<T> extends TagLike {
     _isOption: boolean
 }
 
-export class Option<T> extends TagContainer implements OptionLike<T>{
+export class Option<T> extends SingleTagContainer implements OptionLike<T>{
     _isOption: boolean
+    _next: NextTags
 
     constructor() {
-        super('option', [], [])
+        super('option', [])
+        this._next = new NextTags()
     }
 
     followedBy(o: OptionLike<T>) {
-        super.followedBy(o)
+        this._next.followedBy(o)
         return this
     }
 
@@ -180,6 +247,11 @@ export class Option<T> extends TagContainer implements OptionLike<T>{
         else
             this._addAttr('value', JSON.stringify(t))
         return this
+    }
+
+    get plate(): JQuery {
+        var e = super.getPlate()
+        return this._next.plate(e)
     }
 }
 
@@ -192,9 +264,9 @@ export var plate = $()
 
 export var select = () => { return new Select() }
 export var option = () => { return new Option() }
-export var div = () => { return new TagContainer('div', [], []) }
-export var span = () => { return new TagContainer('span', [], []) }
-export var p = () => { return new TagContainer('p', [], [])}
+export var div = () => { return new TagContainer('div', []) }
+export var span = () => { return new TagContainer('span', []) }
+export var p = () => { return new TagContainer('p', [])}
 export var input = {
     text: () => { return new Input<String>('text') }
     , number: () => { return new Input<number>('number') }
