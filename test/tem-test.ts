@@ -102,6 +102,20 @@ describe('tem', () => {
             })
         })
 
+        describe('text', () => {
+            it('sets text of container', () => {
+                tem.div().text('aaa').plate
+                    .text()
+                    .should.equal('aaa')
+            })
+
+            it('sets the text as first element', () => {
+                tem.div().child(tem.div().text('bbb')).text('aaa').plate
+                    .text()
+                    .should.equal('aaabbb')
+            })
+        })
+
         describe('select', () => {
             it('allows only options as children', () => {
                 tem.select()

@@ -103,7 +103,8 @@ export class HasChildren<T extends Plate> {
 }
 
 export class TagContainer<C extends TagLike, S extends TagLike> extends Tag<S> {
-    _contained: HasChildren<C>
+    _contained: HasChildren<C>;
+    _text: String
 
     constructor(tag: String, attr: Array<{attr: String; value: String}>) {
         super(tag, attr)
@@ -115,12 +116,19 @@ export class TagContainer<C extends TagLike, S extends TagLike> extends Tag<S> {
         return this
     }
 
+    public text(text: String) {
+        this._text = text
+        return this
+    }
+
     get plate(): JQuery {
         return this.getPlate()
     }
 
     public getPlate(): JQuery {
         var e = super.getPlate()
+        if(this._text)
+            e.text(this._text)
         this._contained.plate(e.first())
         return e
     }
