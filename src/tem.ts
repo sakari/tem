@@ -45,7 +45,7 @@ export class Element<S extends Plate> implements Plate {
     }
 
     public getPlate(): JQuery {
-        var e = $('<' + this._tag + '/>') 
+        var e = $('<' + this._tag + '/>')
         this._attr.map((a) => {
             e.attr(a.attr, a.value)
         })
@@ -58,7 +58,7 @@ export class Element<S extends Plate> implements Plate {
     }
 
     public class(c: String) {
-        return this._mergeAttr('class', c) 
+        return this._mergeAttr('class', c)
     }
 
     _addAttr(attr: String, value: String) {
@@ -137,28 +137,28 @@ export class Container<C extends Plate, S extends Plate> extends Element<S> {
     }
 }
 
-export class TagContainer<C extends TagLike, S extends TagLike> 
+export class TagContainer<C extends TagLike, S extends TagLike>
     extends Container<C, S> implements TagLike{
         _isTag: boolean
 
-        public child(child: C) { 
+        public child(child: C) {
             super.child(child)
-            return this 
+            return this
         }
 
         public followedBy(s: S) {
             super.followedBy(s)
-            return this 
+            return this
         }
 
         public id(str: String) {
             super.id(str)
-            return this 
+            return this
         }
 
         public text(t: String) {
             super.text(t)
-            return this 
+            return this
         }
 
     }
@@ -183,7 +183,7 @@ export class TagVar<S extends TagLike> implements TagLike{
     }
 }
 
-export class OptVar<V, C extends TagLike, S extends OptionLike<V>> 
+export class OptVar<V, C extends TagLike, S extends OptionLike<V>>
     implements OptionLike<V> {
         _isOption: boolean
         _isTag: boolean
@@ -212,7 +212,7 @@ export class Input<V, S extends TagLike> extends Tag<S> {
     }
 }
 
-export class Select<V, C extends OptionLike<V>, S extends TagLike> 
+export class Select<V, C extends OptionLike<V>, S extends TagLike>
     extends Container<C, S> implements TagLike {
         _isTag: boolean
 
@@ -220,24 +220,24 @@ export class Select<V, C extends OptionLike<V>, S extends TagLike>
             super('select', [])
         }
 
-        public child(child: C) { 
+        public child(child: C) {
             super.child(child)
-            return this 
+            return this
         }
 
         public followedBy(s: S) {
             super.followedBy(s)
-            return this 
+            return this
         }
 
         public id(str: String) {
             super.id(str)
-            return this 
+            return this
         }
 
         public text(t: String) {
             super.text(t)
-            return this 
+            return this
         }
 
     }
@@ -246,32 +246,32 @@ export interface OptionLike<T> extends Plate {
     _isOption: boolean
 }
 
-export class Option<V, C extends TagLike, S extends OptionLike<V> > 
+export class Option<V, C extends TagLike, S extends OptionLike<V> >
     extends Container<C, S> implements OptionLike<V>{
         _isOption: boolean
-        
+
         constructor() {
             super('option', [])
         }
-        
-        public child(child: C) { 
+
+        public child(child: C) {
             super.child(child)
-            return this 
+            return this
         }
 
         public followedBy(s: S) {
             super.followedBy(s)
-            return this 
+            return this
         }
 
         public id(str: String) {
             super.id(str)
-            return this 
+            return this
         }
 
         public text(t: String) {
             super.text(t)
-            return this 
+            return this
         }
 
     value(t: V) {
@@ -286,32 +286,32 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
 export interface LiLike extends Plate {
     _isLi: boolean
 }
-export class Li<C extends TagLike, S extends LiLike> 
+export class Li<C extends TagLike, S extends LiLike>
     extends Container<C, S> implements LiLike {
         _isLi: boolean
-        
+
         constructor() {
             super('li', [])
         }
-        
-        public child(child: C) { 
+
+        public child(child: C) {
             super.child(child)
-            return this 
+            return this
         }
 
         public followedBy(s: S) {
             super.followedBy(s)
-            return this 
+            return this
         }
 
         public id(str: String) {
             super.id(str)
-            return this 
+            return this
         }
 
         public text(t: String) {
             super.text(t)
-            return this 
+            return this
         }
 
 }
@@ -331,28 +331,28 @@ export function option<V>(): Option<V, TagLike, OptionLike<V>> {
     return new Option()
 }
 
-export class LiContainer<C extends LiLike, S extends TagLike> 
+export class LiContainer<C extends LiLike, S extends TagLike>
     extends Container<C, S> implements TagLike {
         _isTag: boolean
-       
-        public child(child: C) { 
+
+        public child(child: C) {
             super.child(child)
-            return this 
+            return this
         }
 
         public followedBy(s: S) {
             super.followedBy(s)
-            return this 
+            return this
         }
 
         public id(str: String) {
             super.id(str)
-            return this 
+            return this
         }
 
         public text(t: String) {
             super.text(t)
-            return this 
+            return this
         }
     }
 
