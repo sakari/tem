@@ -27,9 +27,7 @@ export class NextTags<T extends Plate> {
     }
 }
 
-export class Tag<S extends TagLike> implements TagLike {
-    _isTag: boolean
-
+export class Element<S extends Plate> implements Plate {
     public _next: NextTags<S>
 
     constructor(public _tag: String
@@ -82,6 +80,11 @@ export class Tag<S extends TagLike> implements TagLike {
     }
 }
 
+export class Tag<S extends TagLike> extends Element<S> implements TagLike {
+    _isTag: boolean
+}
+
+
 export class HasChildren<T extends Plate> {
     _children: Array<T>
 
@@ -102,7 +105,7 @@ export class HasChildren<T extends Plate> {
     }
 }
 
-export class TagContainer<C extends TagLike, S extends TagLike> extends Tag<S> {
+export class Container<C extends Plate, S extends Plate> extends Element<S> {
     _contained: HasChildren<C>;
     _text: String
 
@@ -134,10 +137,35 @@ export class TagContainer<C extends TagLike, S extends TagLike> extends Tag<S> {
     }
 }
 
+export class TagContainer<C extends TagLike, S extends TagLike> 
+    extends Container<C, S> implements TagLike{
+        _isTag: boolean
+
+        public child(child: C) { 
+            super.child(child)
+            return this 
+        }
+
+        public followedBy(s: S) {
+            super.followedBy(s)
+            return this 
+        }
+
+        public id(str: String) {
+            super.id(str)
+            return this 
+        }
+
+        public text(t: String) {
+            super.text(t)
+            return this 
+        }
+
+    }
+
 export interface TagLike extends Plate{
     _isTag: boolean;
 }
-
 
 export class TagVar<S extends TagLike> implements TagLike{
     _isTag: boolean;
@@ -185,23 +213,66 @@ export class Input<V, S extends TagLike> extends Tag<S> {
 }
 
 export class Select<V, C extends OptionLike<V>, S extends TagLike> 
-    extends TagContainer<C, S> implements TagLike {
-    constructor() {
-        super('select', [])
-    }
-}
+    extends Container<C, S> implements TagLike {
+        _isTag: boolean
 
-export interface OptionLike<T> extends TagLike {
+        constructor() {
+            super('select', [])
+        }
+
+        public child(child: C) { 
+            super.child(child)
+            return this 
+        }
+
+        public followedBy(s: S) {
+            super.followedBy(s)
+            return this 
+        }
+
+        public id(str: String) {
+            super.id(str)
+            return this 
+        }
+
+        public text(t: String) {
+            super.text(t)
+            return this 
+        }
+
+    }
+
+export interface OptionLike<T> extends Plate {
     _isOption: boolean
 }
 
 export class Option<V, C extends TagLike, S extends OptionLike<V> > 
-    extends TagContainer<C, S> implements OptionLike<V>{
-    _isOption: boolean
+    extends Container<C, S> implements OptionLike<V>{
+        _isOption: boolean
+        
+        constructor() {
+            super('option', [])
+        }
+        
+        public child(child: C) { 
+            super.child(child)
+            return this 
+        }
 
-    constructor() {
-        super('option', [])
-    }
+        public followedBy(s: S) {
+            super.followedBy(s)
+            return this 
+        }
+
+        public id(str: String) {
+            super.id(str)
+            return this 
+        }
+
+        public text(t: String) {
+            super.text(t)
+            return this 
+        }
 
     value(t: V) {
         if(typeof t === 'string')
@@ -212,15 +283,37 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
     }
 }
 
-export interface LiLike extends TagLike {
+export interface LiLike extends Plate {
     _isLi: boolean
 }
 export class Li<C extends TagLike, S extends LiLike> 
-    extends TagContainer<C, S> implements LiLike {
-    _isLi: boolean
-    constructor() {
-        super('li', [])
-    }
+    extends Container<C, S> implements LiLike {
+        _isLi: boolean
+        
+        constructor() {
+            super('li', [])
+        }
+        
+        public child(child: C) { 
+            super.child(child)
+            return this 
+        }
+
+        public followedBy(s: S) {
+            super.followedBy(s)
+            return this 
+        }
+
+        public id(str: String) {
+            super.id(str)
+            return this 
+        }
+
+        public text(t: String) {
+            super.text(t)
+            return this 
+        }
+
 }
 
 export var variable = {
@@ -238,12 +331,37 @@ export function option<V>(): Option<V, TagLike, OptionLike<V>> {
     return new Option()
 }
 
-export function ol(): TagContainer<LiLike, TagLike> {
-    return new TagContainer('ol', [])
+export class LiContainer<C extends LiLike, S extends TagLike> 
+    extends Container<C, S> implements TagLike {
+        _isTag: boolean
+       
+        public child(child: C) { 
+            super.child(child)
+            return this 
+        }
+
+        public followedBy(s: S) {
+            super.followedBy(s)
+            return this 
+        }
+
+        public id(str: String) {
+            super.id(str)
+            return this 
+        }
+
+        public text(t: String) {
+            super.text(t)
+            return this 
+        }
+    }
+
+export function ol(): LiContainer<LiLike, TagLike> {
+    return new LiContainer('ol', [])
 }
 
-export function ul(): TagContainer<LiLike, TagLike> {
-    return new TagContainer('ul', [])
+export function ul(): LiContainer<LiLike, TagLike> {
+    return new LiContainer('ul', [])
 }
 
 export function li(): Li<TagLike, LiLike> {

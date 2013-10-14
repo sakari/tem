@@ -15,7 +15,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        
         simplemocha: {
             options: {
                 globals: ['should'],
@@ -25,7 +24,6 @@ module.exports = function(grunt) {
             },
             all: { src: ['build/test/**/*.js'] }
         },
-        
         clean: ['build']
     });
     grunt.loadNpmTasks('grunt-typescript');
