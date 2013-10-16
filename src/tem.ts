@@ -28,11 +28,13 @@ export class NextTags<T extends Plate> {
 }
 
 export class Element<S extends Plate> implements Plate {
-    public _next: NextTags<S>
+    public _next: NextTags<S>;
+    public _plated: JQuery;
 
     constructor(public _tag: String
                  , public _attr: Array<{attr: String; value: String}>) {
         this._next = new NextTags()
+        this._plated = $('<' + this._tag + '>')
     }
 
     public followedBy(next: S) {
@@ -45,37 +47,20 @@ export class Element<S extends Plate> implements Plate {
     }
 
     public getPlate(): JQuery {
-        var e = $('<' + this._tag + '/>')
-        this._attr.map((a) => {
-            e.attr(a.attr, a.value)
-        })
-        return this._next.plate(e)
+        return this._next.plate(this._plated)
     }
 
-    public id(id: String) {
-        this._attr.push({attr: 'id', value: id })
+    public id(id: string) {
+        this._plated.attr('id', id)
         return this
     }
 
-    public class(c: String) {
-        return this._mergeAttr('class', c)
+    public remove() {
+        this._plated.remove()
     }
 
-    _addAttr(attr: String, value: String) {
-        this._attr.push({attr: attr, value: value})
-    }
-
-    _mergeAttr(attr: String, value: String) {
-        var found = false
-        this._attr.map((a) => {
-            if(a.attr !== attr)
-                return
-            found = true
-            a.value = a.value + ' ' + value
-            return
-        })
-        if(!found)
-            this._addAttr(attr, value)
+    public class(c: string) {
+        this._plated.addClass(c)
         return this
     }
 }
@@ -106,34 +91,22 @@ export class HasChildren<T extends Plate> {
 }
 
 export class Container<C extends Plate, S extends Plate> extends Element<S> {
-    _contained: HasChildren<C>;
-    _text: String
-
     constructor(tag: String, attr: Array<{attr: String; value: String}>) {
         super(tag, attr)
-        this._contained = new HasChildren()
     }
 
-    public child(child: C) {
-        this._contained.add(child)
+    public append(child: C) {
+        if(this._plated.text())
+            throw new Error('Cannot set both children and text for element')
+        this._plated.append(child.plate)
         return this
     }
 
     public text(text: String) {
-        this._text = text
+        if(this._plated.children().length > 0)
+            throw new Error('Cannot set both children and text for element')
+        this._plated.text(text)
         return this
-    }
-
-    get plate(): JQuery {
-        return this.getPlate()
-    }
-
-    public getPlate(): JQuery {
-        var e = super.getPlate()
-        if(this._text)
-            e.text(this._text)
-        this._contained.plate(e.first())
-        return e
     }
 }
 
@@ -141,8 +114,8 @@ export class TagContainer<C extends TagLike, S extends TagLike>
     extends Container<C, S> implements TagLike{
         _isTag: boolean
 
-        public child(child: C) {
-            super.child(child)
+        public append(child: C) {
+            super.append(child)
             return this
         }
 
@@ -151,12 +124,12 @@ export class TagContainer<C extends TagLike, S extends TagLike>
             return this
         }
 
-        public id(str: String) {
+        public id(str: string) {
             super.id(str)
             return this
         }
 
-        public text(t: String) {
+        public text(t: string) {
             super.text(t)
             return this
         }
@@ -167,47 +140,13 @@ export interface TagLike extends Plate{
     _isTag: boolean;
 }
 
-export class TagVar<S extends TagLike> implements TagLike{
-    _isTag: boolean;
-
-    constructor(private _t?: Tag<S>) {
-    }
-
-    set(t: Tag<S>) {
-        this._t = t
-        return this
-    }
-
-    get plate(): JQuery {
-        return this._t.plate
-    }
-}
-
-export class OptVar<V, C extends TagLike, S extends OptionLike<V>>
-    implements OptionLike<V> {
-        _isOption: boolean
-        _isTag: boolean
-
-        constructor(private _t?: Option<V, C, S>) {
-        }
-
-        set(t: Option<V, C, S>) {
-            this._t = t
-            return this
-        }
-
-        get plate(): JQuery {
-            return this._t.plate
-        }
-    }
-
 export class Input<V, S extends TagLike> extends Tag<S> {
     constructor(type: String) {
         super('input', [{attr: 'type', value: type}])
     }
 
     value(t: V) {
-        this._attr.push({attr: 'value', value: '' + t})
+        this._plated.val('' + t)
         return this
     }
 }
@@ -220,8 +159,8 @@ export class Select<V, C extends OptionLike<V>, S extends TagLike>
             super('select', [])
         }
 
-        public child(child: C) {
-            super.child(child)
+        public append(child: C) {
+            super.append(child)
             return this
         }
 
@@ -230,12 +169,12 @@ export class Select<V, C extends OptionLike<V>, S extends TagLike>
             return this
         }
 
-        public id(str: String) {
+        public id(str: string) {
             super.id(str)
             return this
         }
 
-        public text(t: String) {
+        public text(t: string) {
             super.text(t)
             return this
         }
@@ -254,8 +193,8 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
             super('option', [])
         }
 
-        public child(child: C) {
-            super.child(child)
+        public append(child: C) {
+            super.append(child)
             return this
         }
 
@@ -264,21 +203,23 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
             return this
         }
 
-        public id(str: String) {
+        public id(str: string) {
             super.id(str)
             return this
         }
 
-        public text(t: String) {
+        public text(t: string) {
             super.text(t)
             return this
         }
 
     value(t: V) {
-        if(typeof t === 'string')
-            this._addAttr('value', '' + t)
-        else
-            this._addAttr('value', JSON.stringify(t))
+        var k: any = t
+        if(typeof k === 'string') {
+            this._plated.val(k)
+        } else {
+            this._plated.val(JSON.stringify(t))
+        }
         return this
     }
 }
@@ -294,8 +235,8 @@ export class Li<C extends TagLike, S extends LiLike>
             super('li', [])
         }
 
-        public child(child: C) {
-            super.child(child)
+        public append(child: C) {
+            super.append(child)
             return this
         }
 
@@ -304,21 +245,16 @@ export class Li<C extends TagLike, S extends LiLike>
             return this
         }
 
-        public id(str: String) {
+        public id(str: string) {
             super.id(str)
             return this
         }
 
-        public text(t: String) {
+        public text(t: string) {
             super.text(t)
             return this
         }
 
-}
-
-export var variable = {
-    tag: () => { return new TagVar() }
-    , opt: () => { return new OptVar() }
 }
 
 export var plate = $()
@@ -335,8 +271,8 @@ export class LiContainer<C extends LiLike, S extends TagLike>
     extends Container<C, S> implements TagLike {
         _isTag: boolean
 
-        public child(child: C) {
-            super.child(child)
+        public append(child: C) {
+            super.append(child)
             return this
         }
 
@@ -345,12 +281,12 @@ export class LiContainer<C extends LiLike, S extends TagLike>
             return this
         }
 
-        public id(str: String) {
+        public id(str: string) {
             super.id(str)
             return this
         }
 
-        public text(t: String) {
+        public text(t: string) {
             super.text(t)
             return this
         }

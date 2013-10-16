@@ -23,13 +23,21 @@ describe('tem', () => {
         })
 
         it('allows setting child elements', () => {
-            tem.div().child(tem.div()).plate.children().length
+            tem.div().append(tem.div()).plate.children().length
                 .should.eql(1)
         })
 
         it('allows setting classes', () => {
             tem.div().class('c1').class('c2').plate.attr('class')
                 .should.equal('c1 c2')
+        })
+
+        it('allows changing the element structure after plating', () => {
+            var div = tem.div()
+            var q = tem.div().append(div).plate
+
+            div.append(tem.span().id('addedSpan'))
+            q.find('#addedSpan').length.should.eql(1)
         })
 
         it('provides these html elements', () => {
@@ -41,6 +49,17 @@ describe('tem', () => {
                 .should.eql('SPAN')
             tem.input.text().plate.prop('tagName')
                 .should.eql('INPUT')
+        })
+
+        describe('remove', () => {
+            it('removes the element from the plated result', () => {
+                var k = tem.span()
+                var p = tem.div().append(k).plate
+
+                p.find('span').length.should.eql(1)
+                k.remove()
+                p.find('span').length.should.eql(0)
+            })
         })
 
         describe('followedBy', () => {
@@ -88,7 +107,7 @@ describe('tem', () => {
 
         describe('ol', () => {
             it('allows li elements as children', () => {
-                tem.ol().child(tem.li()).plate
+                tem.ol().append(tem.li()).plate
                     .find('li').length
                     .should.equal(1)
             })
@@ -96,7 +115,7 @@ describe('tem', () => {
 
         describe('ul', () => {
             it('allows li elements as children', () => {
-                tem.ul().child(tem.li()).plate
+                tem.ul().append(tem.li()).plate
                     .find('li').length
                     .should.equal(1)
             })
@@ -109,28 +128,18 @@ describe('tem', () => {
                     .should.equal('aaa')
             })
 
-            it('sets the text as first element', () => {
-                tem.div().child(tem.div().text('bbb')).text('aaa').plate
-                    .text()
-                    .should.equal('aaabbb')
+            it('throws if both children and text are set', () => {
+
+                (() => {
+                    tem.div().append(tem.div().text('bbb')).text('aaa')
+                }).should.throw('Cannot set both children and text for element')
             })
         })
 
         describe('select', () => {
             it('allows only options as children', () => {
                 tem.select()
-                    .child(tem.option())
-                    .plate
-                    .find('option')
-                    .length
-                    .should.equal(1)
-            })
-
-            it('allows option variable as child', () => {
-                var v = tem.variable.opt()
-                v.set(tem.option())
-                tem.select()
-                    .child(v)
+                    .append(tem.option())
                     .plate
                     .find('option')
                     .length
@@ -141,14 +150,14 @@ describe('tem', () => {
                 it('stringifies json object to value', () => {
                     var opt = tem.option().value({ foo: 1})
                     tem.select()
-                        .child(opt)
+                        .append(opt)
                         .plate
                         .find('option').attr('value')
                         .should.equal('{"foo":1}')
                 })
 
                 it('leaves strings as is', () => {
-                    tem.select().child(tem.option().value('abc'))
+                    tem.select().append(tem.option().value('abc'))
                         .plate.find('option').attr('value')
                         .should.equal('abc')
                 })
@@ -158,23 +167,7 @@ describe('tem', () => {
                         .length
                         .should.eql(2)
                 })
-
-                it('can be followed by option vars', () => {
-                    var o = tem.variable.opt()
-                    o.set(tem.option())
-                    tem.option().followedBy(o).plate.length
-                        .should.eql(2)
-                })
             })
-        })
-    })
-
-    describe('variables', () => {
-        it('variables are substituted', () => {
-            var v = tem.variable.tag()
-            var t = tem.div().child(v)
-            v.set(tem.div())
-            t.plate.find('div').length.should.eql(1)
         })
     })
 })
