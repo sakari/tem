@@ -65,7 +65,7 @@ export class Element<S extends Plate> implements Plate {
     }
 }
 
-export class Tag<S extends TagLike> extends Element<S> implements TagLike {
+export class Tag extends Element<TagLike> implements TagLike {
     _isTag: boolean
 }
 
@@ -110,16 +110,16 @@ export class Container<C extends Plate, S extends Plate> extends Element<S> {
     }
 }
 
-export class TagContainer<C extends TagLike, S extends TagLike>
-    extends Container<C, S> implements TagLike{
+export class TagContainer
+    extends Container<TagLike, TagLike> implements TagLike{
         _isTag: boolean
 
-        public append(child: C) {
+        public append(child: TagLike) {
             super.append(child)
             return this
         }
 
-        public followedBy(s: S) {
+        public followedBy(s: TagLike) {
             super.followedBy(s)
             return this
         }
@@ -140,7 +140,7 @@ export interface TagLike extends Plate{
     _isTag: boolean;
 }
 
-export class Input<V, S extends TagLike> extends Tag<S> {
+export class Input<V> extends Tag {
     constructor(type: String) {
         super('input', [{attr: 'type', value: type}])
     }
@@ -151,20 +151,20 @@ export class Input<V, S extends TagLike> extends Tag<S> {
     }
 }
 
-export class Select<V, C extends OptionLike<V>, S extends TagLike>
-    extends Container<C, S> implements TagLike {
+export class Select<V>
+    extends Container<OptionLike<V>, TagLike> implements TagLike {
         _isTag: boolean
 
         constructor() {
             super('select', [])
         }
 
-        public append(child: C) {
+        public append(child: OptionLike<V>) {
             super.append(child)
             return this
         }
 
-        public followedBy(s: S) {
+        public followedBy(s: TagLike) {
             super.followedBy(s)
             return this
         }
@@ -185,20 +185,20 @@ export interface OptionLike<T> extends Plate {
     _isOption: boolean
 }
 
-export class Option<V, C extends TagLike, S extends OptionLike<V> >
-    extends Container<C, S> implements OptionLike<V>{
+export class Option<V>
+    extends Container<TagLike, OptionLike<V>> implements OptionLike<V>{
         _isOption: boolean
 
         constructor() {
             super('option', [])
         }
 
-        public append(child: C) {
+        public append(child: TagLike) {
             super.append(child)
             return this
         }
 
-        public followedBy(s: S) {
+        public followedBy(s: OptionLike<V>) {
             super.followedBy(s)
             return this
         }
@@ -227,20 +227,20 @@ export class Option<V, C extends TagLike, S extends OptionLike<V> >
 export interface LiLike extends Plate {
     _isLi: boolean
 }
-export class Li<C extends TagLike, S extends LiLike>
-    extends Container<C, S> implements LiLike {
+export class Li
+    extends Container<TagLike, LiLike> implements LiLike {
         _isLi: boolean
 
         constructor() {
             super('li', [])
         }
 
-        public append(child: C) {
+        public append(child: TagLike) {
             super.append(child)
             return this
         }
 
-        public followedBy(s: S) {
+        public followedBy(s: LiLike) {
             super.followedBy(s)
             return this
         }
@@ -259,24 +259,24 @@ export class Li<C extends TagLike, S extends LiLike>
 
 export var plate = $()
 
-export function select<V>(): Select<V, OptionLike<V>, TagLike>{
+export function select<V>(): Select<V> {
     return new Select()
 }
 
-export function option<V>(): Option<V, TagLike, OptionLike<V>> {
+export function option<V>(): Option<V> {
     return new Option()
 }
 
-export class LiContainer<C extends LiLike, S extends TagLike>
-    extends Container<C, S> implements TagLike {
+export class LiContainer
+    extends Container<LiLike, TagLike> implements TagLike {
         _isTag: boolean
 
-        public append(child: C) {
+        public append(child: LiLike) {
             super.append(child)
             return this
         }
 
-        public followedBy(s: S) {
+        public followedBy(s: TagLike) {
             super.followedBy(s)
             return this
         }
@@ -292,27 +292,27 @@ export class LiContainer<C extends LiLike, S extends TagLike>
         }
     }
 
-export function ol(): LiContainer<LiLike, TagLike> {
+export function ol(): LiContainer {
     return new LiContainer('ol', [])
 }
 
-export function ul(): LiContainer<LiLike, TagLike> {
+export function ul(): LiContainer {
     return new LiContainer('ul', [])
 }
 
-export function li(): Li<TagLike, LiLike> {
+export function li(): Li {
     return new Li()
 }
 
-export function div(): TagContainer<TagLike, TagLike> {
+export function div(): TagContainer {
     return new TagContainer('div', [])
 }
 
-export function span(): TagContainer<TagLike, TagLike> {
+export function span(): TagContainer {
     return new TagContainer('span', [])
 }
 
-export function p(): TagContainer<TagLike, TagLike> {
+export function p(): TagContainer {
     return new TagContainer('p', [])
 }
 
