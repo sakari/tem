@@ -103,6 +103,18 @@ describe('tem', () => {
                     .val()
                     .should.equal('1')
             })
+
+            it('can set binders', () => {
+                var got = false
+                var a = tem.input.text().bind((i) => {
+                    i.plate.change(() => {
+                        got = true
+                    })
+                }).plate
+
+                a.val('a').change()
+                got.should.eql(true)
+            })
         })
 
         describe('ol', () => {

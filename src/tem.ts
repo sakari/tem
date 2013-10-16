@@ -55,6 +55,11 @@ export class Element<S extends Plate> implements Plate {
         return this
     }
 
+    public bind(fn: (v: Element<S>) => void) {
+        fn(this)
+        return this
+    }
+
     public remove() {
         this._plated.remove()
     }
@@ -67,6 +72,7 @@ export class Element<S extends Plate> implements Plate {
 
 export class Tag extends Element<TagLike> implements TagLike {
     _isTag: boolean
+
 }
 
 
@@ -114,6 +120,11 @@ export class TagContainer
     extends Container<TagLike, TagLike> implements TagLike{
         _isTag: boolean
 
+        public bind(fn: (v: TagContainer) => void) {
+            fn(this)
+            return this
+        }
+
         public append(child: TagLike) {
             super.append(child)
             return this
@@ -133,7 +144,6 @@ export class TagContainer
             super.text(t)
             return this
         }
-
     }
 
 export interface TagLike extends Plate{
@@ -145,10 +155,16 @@ export class Input<V> extends Tag {
         super('input', [{attr: 'type', value: type}])
     }
 
+    public bind(fn: (v: Input<V>) => void) {
+        fn(this)
+        return this
+    }
+
     value(t: V) {
         this._plated.val('' + t)
         return this
     }
+
 }
 
 export class Select<V>
@@ -157,6 +173,11 @@ export class Select<V>
 
         constructor() {
             super('select', [])
+        }
+
+        public bind(fn: (v: Select<V>) => void) {
+            fn(this)
+            return this
         }
 
         public append(child: OptionLike<V>) {
@@ -193,6 +214,11 @@ export class Option<V>
             super('option', [])
         }
 
+        public bind(fn: (v: Option<V>) => void) {
+            fn(this)
+            return this
+        }
+
         public append(child: TagLike) {
             super.append(child)
             return this
@@ -213,15 +239,16 @@ export class Option<V>
             return this
         }
 
-    value(t: V) {
-        var k: any = t
-        if(typeof k === 'string') {
-            this._plated.val(k)
-        } else {
-            this._plated.val(JSON.stringify(t))
+        value(t: V) {
+            var k: any = t
+            if(typeof k === 'string') {
+                this._plated.val(k)
+            } else {
+                this._plated.val(JSON.stringify(t))
+            }
+            return this
         }
-        return this
-    }
+
 }
 
 export interface LiLike extends Plate {
@@ -233,6 +260,11 @@ export class Li
 
         constructor() {
             super('li', [])
+        }
+
+        public bind(fn: (v: Li) => void) {
+            fn(this)
+            return this
         }
 
         public append(child: TagLike) {
@@ -254,7 +286,6 @@ export class Li
             super.text(t)
             return this
         }
-
 }
 
 export var plate = $()
@@ -270,6 +301,11 @@ export function option<V>(): Option<V> {
 export class LiContainer
     extends Container<LiLike, TagLike> implements TagLike {
         _isTag: boolean
+
+        public bind(fn: (v: LiContainer) => void) {
+            fn(this)
+            return this
+        }
 
         public append(child: LiLike) {
             super.append(child)
