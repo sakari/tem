@@ -26,9 +26,11 @@ module.exports = function(grunt) {
         },
         clean: ['build']
     });
+
+    grunt.registerTask('create-types', require('./tasks/create-types'))
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.registerTask('build', ['clean', 'typescript']);
+    grunt.registerTask('build', ['clean', 'create-types', 'typescript']);
     grunt.registerTask('test', ['build', 'simplemocha']);
 }

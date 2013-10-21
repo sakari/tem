@@ -151,7 +151,7 @@ describe('tem', () => {
         describe('select', () => {
             it('allows only options as children', () => {
                 tem.select()
-                    .append(tem.option())
+                    .append(tem.option('v'))
                     .plate
                     .find('option')
                     .length
@@ -160,7 +160,7 @@ describe('tem', () => {
 
             describe('option', () => {
                 it('stringifies json object to value', () => {
-                    var opt = tem.option().value({ foo: 1})
+                    var opt = tem.option({foo: 1})
                     tem.select()
                         .append(opt)
                         .plate
@@ -169,13 +169,13 @@ describe('tem', () => {
                 })
 
                 it('leaves strings as is', () => {
-                    tem.select().append(tem.option().value('abc'))
+                    tem.select().append(tem.option('abc'))
                         .plate.find('option').attr('value')
                         .should.equal('abc')
                 })
 
                 it('can be followed by other options', () => {
-                    tem.option().followedBy(tem.option()).plate
+                    tem.option('').followedBy(tem.option('')).plate
                         .length
                         .should.eql(2)
                 })
