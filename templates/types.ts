@@ -47,20 +47,15 @@ export function option<V>(v: V): Option<V> { return new Option(v) }
 {{{containerLike 'P' 'Tag' 'TagLike' 'TagLike' }}}
 
 export class Input<V> extends base.Element<TagLike> {
-    constructor(private _type: String) {
+    constructor(type: string) {
         super('input')
+        this._attr('type', type)
     }
     {{{element 'Input<V>' 'TagLike'}}}
 
     public value(v: V) {
         this._plated.val('' + v)
         return this
-    }
-
-    public getPlate() {
-        var e = super.getPlate()
-        e.first().attr('type', this._type)
-        return e
     }
 }
 

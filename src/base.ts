@@ -36,6 +36,11 @@ export class Element<S extends Plate> implements Plate {
         this._plated = $('<' + this._tag + '>')
     }
 
+    public _attr(attr: string, value: string) {
+        this._plated.first().attr(attr, value)
+        return this
+    }
+
     public followedBy(next: S) {
         this._next.followedBy(next)
         return this
