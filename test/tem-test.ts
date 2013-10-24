@@ -51,6 +51,19 @@ describe('tem', () => {
                 .should.eql('INPUT')
         })
 
+        describe('bind', () => {
+            it('gets called with the element', () => {
+                var got = false
+                var e = tem.input.text().bind((t) => {
+                    t.plate.change(()=> {
+                        got = true
+                    })
+                }).plate
+                e.val('a').change()
+                got.should.eql(true)
+            })
+        })
+
         describe('remove', () => {
             it('removes the element from the plated result', () => {
                 var k = tem.span()
@@ -102,18 +115,6 @@ describe('tem', () => {
                     .plate
                     .val()
                     .should.equal('1')
-            })
-
-            it('can set binders', () => {
-                var got = false
-                var a = tem.input.text().bind((i) => {
-                    i.plate.change(() => {
-                        got = true
-                    })
-                }).plate
-
-                a.val('a').change()
-                got.should.eql(true)
             })
         })
 
